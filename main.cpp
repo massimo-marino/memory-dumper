@@ -165,5 +165,10 @@ int main ()
     utilities::dumpMemory(_arr, 10); // utilities::dumpMemory(_arr, 10, getDemangledTypeName<decltype(_arr)>());
   }
 
+  {
+    int v3 {4};
+    utilities::dumpMemory(&v3, sizeof(v3));
+  }
+
   return 0;
 }

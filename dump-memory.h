@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <type_traits>
 #include <cxxabi.h>
 ////////////////////////////////////////////////////////////////////////////////
 // useful macros
@@ -29,7 +30,7 @@ std::string
 getDemangledTypeName() noexcept
 {
   int status {};
-  char *demangledName {abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)};
+  char* demangledName {abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)};
   std::string demangledNameString {static_cast<std::string>(demangledName)};
 
   free(demangledName);
@@ -39,24 +40,28 @@ getDemangledTypeName() noexcept
 
 namespace utilities {
 void
-dumpMemory(const void *ptr,
+dumpMemory(const void* ptr,
            std::size_t size,
-           std::string &&demangledTypeName = "",
-           std::ostream &os = std::cout);
+           std::string&& demangledTypeName = "",
+           std::ostream& os = std::cout) noexcept;
 
 template <typename T>
 void
-dumpMemory(const T *ptr,
+dumpMemory(T ptr,
            std::size_t size,
-           std::ostream &os = std::cout);
+           std::ostream& os = std::cout) noexcept;
 
 template <typename T>
 void
-dumpMemory(const T *ptr,
+dumpMemory(const T ptr,
            size_t size,
-           std::ostream &os)
+           std::ostream& os) noexcept
 {
-  dumpMemory(reinterpret_cast<const void *>(ptr), size, getDemangledTypeName<T>(), os);
+  static_assert(std::is_pointer<T>::value, "pointer needed");
+
+  dumpMemory(reinterpret_cast<const void*>(ptr),
+             size,
+             getDemangledTypeName<decltype(typename std::remove_pointer<T>::type())>(), os);
 }
 
 }  // namespace utilities

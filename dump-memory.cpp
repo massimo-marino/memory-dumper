@@ -13,10 +13,10 @@ namespace utilities {
 // see: https://jrruethe.github.io/blog/2015/08/23/placement-new/
 //
 void
-dumpMemory(const void *ptr,
+dumpMemory(const void* ptr,
            const std::size_t size,
-           std::string &&demangledTypeName,
-           std::ostream &os)
+           std::string&& demangledTypeName,
+           std::ostream& os) noexcept
 {
   using byte_t = unsigned char;
   using uptr_t = unsigned long;
