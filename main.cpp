@@ -94,6 +94,7 @@ __asm__
 
 int main ()
 {
+  using namespace std::string_literals;
 
   // iptr is allocated on the stack, while the int pointed to is in the heap
   int* iptr = new int(0x01234567);
@@ -166,9 +167,21 @@ int main ()
   }
 
   {
-    int v3 {4};
+    int v3 {0x00000004};
     utilities::dumpMemory(&v3, sizeof(v3));
   }
+
+  {
+    int v4 {0x0BDF1177};
+    utilities::dumpMemory(v4);
+  }
+
+  utilities::dumpMemory(0x00123456);
+  utilities::dumpMemory(1.0);
+  utilities::dumpMemory(static_cast<std::string>("Hello World!"));
+  utilities::dumpMemory("Hello World!"s);
+  utilities::dumpMemory("Hello World!", 13);
+  utilities::dumpMemory("0001234000");
 
   return 0;
 }

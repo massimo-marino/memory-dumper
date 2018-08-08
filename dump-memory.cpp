@@ -151,5 +151,9 @@ dumpMemory(const void* ptr,
      << std::endl;
 }  // dumpMemory
 
+void dumpMemory(const char a[], std::ostream& os)
+{
+  dumpMemory(a, std::strlen(a), os);
+}
 }  // namespace utilities
 
