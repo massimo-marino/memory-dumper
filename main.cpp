@@ -181,7 +181,7 @@ int main ()
   utilities::dumpMemory(static_cast<std::string>("Hello World!"));
   utilities::dumpMemory("Hello World!"s);
   utilities::dumpMemory("Hello World!", 13);
-  utilities::dumpMemory("0001234000");
+  utilities::dumpMemory("Hello World!");
 
   return 0;
 }
