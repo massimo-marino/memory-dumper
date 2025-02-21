@@ -1,25 +1,25 @@
 //
 // dump-memory.cpp
 //
-// Created by massimo on 7/17/18.
-//
 #include "dump-memory.h"
-
 #include <iomanip>
 //#include <boost/format.hpp>
 ////////////////////////////////////////////////////////////////////////////////
 namespace utilities {
 //
-// see: https://jrruethe.github.io/blog/2015/08/23/placement-new/
+// See: https://jrruethe.github.io/blog/2015/08/23/placement-new/ for original code;
+// page not found on Feb 2025, it's been archived here last time:
+// https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/
 //
-void
-dumpMemory(const void* ptr,
-           const std::size_t size,
-           std::string&& demangledTypeName,
-           std::ostream& os) noexcept
-{
+void dumpMemory(const void* ptr,
+                const std::size_t size,
+                std::string&& demangledTypeName,
+                std::ostream& os) noexcept {
   using byte_t = unsigned char;
   using uptr_t = unsigned long;
+
+  const std::string FGRED       {"\033[1;31m"};  // foreground red
+  const std::string RESET_COLOR {"\033[0m"};
 
   // dump from ptr-16 bytes through ptr+16 bytes
   const uptr_t memBuffer {16};
@@ -28,8 +28,7 @@ dumpMemory(const void* ptr,
   uptr_t iptr = reinterpret_cast<uptr_t>(ptr) - memBuffer;
 
   os << "-----------------------------------------------------------------------\n";
-  if ("" != demangledTypeName)
-  {
+  if ("" != demangledTypeName) {
     //os << boost::format("Type %s of %d bytes\n") % demangledTypeName % size;
     os << "Type "
        << demangledTypeName
@@ -40,9 +39,7 @@ dumpMemory(const void* ptr,
        << std::hex << std::uppercase
        << ptr
        << "\n\n";
-  }
-  else
-  {
+  } else {
     //os << boost::format("%d bytes\n") % size;
     os << size
        << " bytes - Memory to dump starts at: "
@@ -53,11 +50,9 @@ dumpMemory(const void* ptr,
 
   // Write the address offsets along the top row
   os << std::string(19, ' ');
-  for (std::size_t i{0}; i < 16; ++i)
-  {
+  for (std::size_t i{0}; i < 16; ++i) {
     // Spaces between every 4 bytes
-    if (i % 4 == 0)
-    {
+    if (i % 4 == 0) {
       os << " ";
     }
     //os << boost::format(" %2hhX") % i; // Write the address offset
@@ -70,8 +65,7 @@ dumpMemory(const void* ptr,
   }
 
   // If the object is not aligned
-  if (iptr % 16 != 0)
-  {
+  if (iptr % 16 != 0) {
     // Print the first address
     //os << boost::format("\n0x%016lX:") % (iptr & ~15);
     os << "\n0x"
@@ -82,26 +76,23 @@ dumpMemory(const void* ptr,
        << ":";
 
     // Indent to the offset
-    for (std::size_t i{0}; i < iptr % 16; ++i)
-    {
+    for (std::size_t i{0}; i < iptr % 16; ++i) {
       os << "   ";
-      if (i % 4 == 0)
-      {
+      if (i % 4 == 0) {
         os << " ";
       }
     }
   }
 
   bool closed {false};
+  bool marking {false};
   const auto endByteToDump {(size + memBuffer * 2)};
   const auto endByteToMark {(size + memBuffer - 1)};
 
   // Dump the memory
-  for (std::size_t i {0}; i < endByteToDump; ++i, ++iptr)
-  {
+  for (std::size_t i {0}; i < endByteToDump; ++i, ++iptr) {
     // New line and address every 16 bytes, spaces every 4 bytes
-    if ( iptr % 16 == 0 )
-    {
+    if ( iptr % 16 == 0 ) {
       //os << boost::format("\n0x%016lX:") % iptr;
       os << "\n0x"
          << std::setfill('0')
@@ -110,40 +101,35 @@ dumpMemory(const void* ptr,
          << std::setw(0)
          << ":";
     }
-    if ( iptr % 4 == 0 )
-    {
+    if ( iptr % 4 == 0 ) {
       os << " ";
     }
 
     // Write the address contents
     //os << boost::format(" %02hhX") % static_cast<uptr_t>(*reinterpret_cast<byte_t *>(iptr));
-    if ( 16 == i )
-    {
-      os << "<";
-    }
-    else
-    {
-      if ( closed )
-      {
+    if ( 16 == i ) {
+      os << FGRED << "<";  // start marker
+      marking = true;
+    } else {
+      if ( closed ) {
         closed = false;
-        if ( iptr % 16 == 0 )
-        {
+        if ( iptr % 16 == 0 ) {
           os << " ";
         }
-      }
-      else
-      {
+      } else {
         os << " ";
       }
     }
-    os << std::hex
+    os << ((marking) ? FGRED : "")
+       << std::hex
        << std::setw(2)
        << std::setfill('0')
-       << static_cast<uptr_t>(*reinterpret_cast<byte_t *>(iptr));
-    if ( i == endByteToMark )
-    {
+       << static_cast<uptr_t>(*reinterpret_cast<byte_t *>(iptr))
+       << RESET_COLOR;
+    if ( i == endByteToMark ) {
       closed = true;
-      os << ">";
+      marking = false;
+      os << FGRED << ">" << RESET_COLOR;  // end marker
     }
   }
 
@@ -151,9 +137,7 @@ dumpMemory(const void* ptr,
      << std::endl;
 }  // dumpMemory
 
-void dumpMemory(const char a[], std::ostream& os)
-{
+void dumpMemory(const char a[], std::ostream& os) {
   dumpMemory(a, std::strlen(a), os);
 }
 }  // namespace utilities
-

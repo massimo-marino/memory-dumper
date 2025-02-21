@@ -1,29 +1,55 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-PROJECT(dump-memory)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.26)
+SET(THE_PROJECT dump-memory)
 
-#SET (CMAKE_CXX_COMPILER "/clang_5.0.0/bin/clang++-5.0")
-#SET (CMAKE_CXX_STANDARD 17)
+SET (CMAKE_C_COMPILER clang)
+SET (CMAKE_CXX_COMPILER clang++)
 
-################################################################################
-#### settings for clang 5.0
-SET (CMAKE_CXX_COMPILER "/clang_5.0.0/bin/clang++-5.0")
-SET (CMAKE_INCLUDE_PATH "-I/clang_5.0.0/include/c++/v1 -I." )
-SET (CLANG_CXX_FLAGS "${CMAKE_INCLUDE_PATH} -std=c++17 -Ofast -ffast-math -pthread -pedantic -pedantic-errors -Wall -Weffc++ -Wextra -Wfatal-errors -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -fno-assume-sane-operator-new")
-####SET (CLANG_CXX_FLAGS "${CLANG_CXX_FLAGS} -fsanitize=undefined")
-SET (CMAKE_CXX_FLAGS "${CLANG_CXX_FLAGS} -mtune=native -march=native -m64 -lm -lpthread") # -lc++experimental")
-### use libstdc++
-#SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-### use libc++
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-SET (CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu")
-################################################################################
+PROJECT(${THE_PROJECT} LANGUAGES CXX VERSION 1.0.0 DESCRIPTION "dump-memory: memory dumper")
 
-SET (CMAKE_VERBOSE_MAKEFILE on)
+# C++ version
+SET (CMAKE_CXX_STANDARD 20)
+SET (CMAKE_CXX_STANDARD_REQUIRED ON)
+SET (CMAKE_CXX_EXTENSIONS OFF)
+
+SET (CMAKE_EXPORT_COMPILE_COMMANDS on)
+SET (CMAKE_VERBOSE_MAKEFILE on )
+
+SET(BUILD_SHARED_LIBS ON)
+
+SET (CMAKE_BUILD_TYPE Release) # Debug, Release, RelWithDebInfo, MinSizeRel
+
+# Set the build type (Debug, Release, RelWithDebInfo, MinSizeRel)
+if(NOT CMAKE_BUILD_TYPE)
+  SET (CMAKE_BUILD_TYPE Release)
+endif()
+
+# Set more compiler flags for debug mode; -g is automatically set
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  SET (CLANG_CXX_FLAGS "${CLANG_CXX_FLAGS} -Wall -Wextra -pthread -pedantic -pedantic-errors -Wfatal-errors -mtune=native -march=native -m64")
+endif()
+
+# Set more compiler flags for release mode; -O3 is automatically set
+if(CMAKE_BUILD_TYPE MATCHES Release)
+  SET (CLANG_CXX_FLAGS "${CLANG_CXX_FLAGS} -Wall -Wextra -pthread -pedantic -pedantic-errors -Wfatal-errors -mtune=native -march=native -m64")
+endif()
+if(${CMAKE_CXX_COMPILER} MATCHES "clang[++]")
+  SET (CMAKE_CXX_FLAGS "${CLANG_CXX_FLAGS}")
+else()
+  SET (CMAKE_CXX_FLAGS "${CLANG_CXX_FLAGS} -lm -lpthread")
+endif()
+
+SET(SOURCE_FILES
+    dump-memory.cpp
+    main.cpp
+)
+SET(TARGET ${THE_PROJECT})
+ADD_EXECUTABLE(${THE_PROJECT} ${SOURCE_FILES})
 
 # ------------------------- Begin Generic CMake Variable Logging ------------------
+MESSAGE( STATUS " " ${} )
+MESSAGE( STATUS "<<<---------------------- Logging CMake Variables for Project: " ${PROJECT_NAME} )
 
 # /*	C++ comment style not allowed	*/
-
 
 # if you are building in-source, this is the same as CMAKE_SOURCE_DIR, otherwise
 # this is the top level directory of your build tree
@@ -115,7 +141,6 @@ MESSAGE( STATUS "MSVC71: " ${MSVC71} )
 MESSAGE( STATUS "MSVC80: " ${MSVC80} )
 MESSAGE( STATUS "CMAKE_COMPILER_2005: " ${CMAKE_COMPILER_2005} )
 
-
 # set this to true if you don't want to rebuild the object files if the rules have changed,
 # but not the actual source files or headers (e.g. if you changed the some compiler switches)
 MESSAGE( STATUS "CMAKE_SKIP_RULE_DEPENDENCY: " ${CMAKE_SKIP_RULE_DEPENDENCY} )
@@ -135,7 +160,6 @@ MESSAGE( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 # you want to use the generated build files on another machine.
 MESSAGE( STATUS "CMAKE_SUPPRESS_REGENERATION: " ${CMAKE_SUPPRESS_REGENERATION} )
 
-
 # A simple way to get switches to the compiler is to use ADD_DEFINITIONS().
 # But there are also two variables exactly for this purpose:
 
@@ -144,7 +168,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
 
 # the compiler flags for compiling C++ sources
 MESSAGE( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
-
+MESSAGE( STATUS "CLANG_CXX_FLAGS: " ${CLANG_CXX_FLAGS} )
 
 # Choose the type of build.  Example: SET(CMAKE_BUILD_TYPE Debug)
 MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
@@ -157,21 +181,18 @@ MESSAGE( STATUS "CMAKE_C_COMPILER: " ${CMAKE_C_COMPILER} )
 
 # the compiler used for C++ files
 MESSAGE( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER} )
+MESSAGE( STATUS "CMAKE_CXX_STANDARD: " ${CMAKE_CXX_STANDARD} )
 
 # if the compiler is a variant of gcc, this should be set to 1
 MESSAGE( STATUS "CMAKE_COMPILER_IS_GNUCC: " ${CMAKE_COMPILER_IS_GNUCC} )
 
 # if the compiler is a variant of g++, this should be set to 1
-MESSAGE( STATUS "CMAKE_COMPILER_IS_GNUCXX : " ${CMAKE_COMPILER_IS_GNUCXX} )
+MESSAGE( STATUS "CMAKE_COMPILER_IS_GNUCXX: " ${CMAKE_COMPILER_IS_GNUCXX} )
 
 # the tools for creating libraries
 MESSAGE( STATUS "CMAKE_AR: " ${CMAKE_AR} )
 MESSAGE( STATUS "CMAKE_RANLIB: " ${CMAKE_RANLIB} )
 
-#
-#MESSAGE( STATUS ": " ${} )
-MESSAGE( STATUS )
-
+MESSAGE( STATUS "<<<---------------------- End of Logging CMake Variables for Project: " ${PROJECT_NAME} )
+MESSAGE( STATUS " " ${} )
 # ------------------------- End of Generic CMake Variable Logging ------------------
-
-ADD_EXECUTABLE(dump-memory dump-memory.cpp dump-memory.h main.cpp)

@@ -1,8 +1,6 @@
 //
 // dump-memory.h
 //
-// Created by massimo on 7/17/18.
-//
 #pragma once
 
 #include <iostream>
@@ -10,7 +8,6 @@
 #include <type_traits>
 #include <cxxabi.h>
 #include <cstring>
-
 ////////////////////////////////////////////////////////////////////////////////
 // useful macros
 // in case we want to dump a variable
@@ -20,18 +17,12 @@
 #define DMP(ptr, type) utilities::dumpMemory(ptr, sizeof(type))
 //#define DMP(ptr, type) utilities::dumpMemory(ptr, sizeof(type), getDemangledTypeName<type>())
 
-namespace demangle
-{
+namespace demangle {
 template<typename T>
-static
-std::string
-getDemangledTypeName() noexcept;
+static std::string getDemangledTypeName() noexcept;
 
 template<typename T>
-static
-std::string
-getDemangledTypeName() noexcept
-{
+static std::string getDemangledTypeName() noexcept {
   int status{};
   char *demangledName{abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)};
   std::string demangledNameString{static_cast<std::string>(demangledName)};
@@ -44,24 +35,20 @@ getDemangledTypeName() noexcept
 
 namespace utilities
 {
-void
-dumpMemory(const void* ptr,
-           std::size_t size,
-           std::string&& demangledTypeName = "",
-           std::ostream& os = std::cout) noexcept;
+void dumpMemory(const void* ptr,
+                std::size_t size,
+                std::string&& demangledTypeName = "",
+                std::ostream& os = std::cout) noexcept;
 
 template <typename T>
-void
-dumpMemory(T ptr,
-           std::size_t size,
-           std::ostream& os = std::cout) noexcept;
+void dumpMemory(T ptr,
+                std::size_t size,
+                std::ostream& os = std::cout) noexcept;
 
 template <typename T>
-void
-dumpMemory(const T ptr,
-           size_t size,
-           std::ostream& os) noexcept
-{
+void dumpMemory(const T ptr,
+                size_t size,
+                std::ostream& os) noexcept {
   static_assert(std::is_pointer<T>::value, "pointer needed as arg 1 for dumpMemory()");
 
   dumpMemory(reinterpret_cast<const void*>(ptr),
@@ -71,13 +58,10 @@ dumpMemory(const T ptr,
 }
 
 template <typename T>
-void
-dumpMemory(T&& var, std::ostream& os = std::cout) noexcept;
+void dumpMemory(T&& var, std::ostream& os = std::cout) noexcept;
 
 template <typename T>
-void
-dumpMemory(T&& var, std::ostream& os) noexcept
-{
+void dumpMemory(T&& var, std::ostream& os) noexcept {
   static_assert(std::is_reference<decltype(var)>::value != 0,
                 "reference, or either lvalue or rvalue reference needed as arg 1 for dumpMemory()");
 

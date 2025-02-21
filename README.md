@@ -1,15 +1,24 @@
 # memory-dumper
-a memory dumper in C++17
+A memory dumper in C++
 
-C++17 implementation of a memory dumper
+C++ implementation of a memory dumper.
+
+Tested on Ubuntu 22.04.
+
+See:
+
+[https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/](https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/)
+
+for original code.
+
 
 ## Requirements
 
 `cmake` is used to compile the sources.
 
-The default compiler used is `clang++-5.0`.
+The default compiler used is `clang++`.
 
-The cmake files compile with `-std=c++17`.
+The cmake files compile with `-std=c++20`.
 
 
 ## Install and Run the Example
