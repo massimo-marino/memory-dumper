@@ -1,25 +1,28 @@
 //
-// dump-memory.cpp
+// memDump.cpp
 //
-#include "dump-memory.h"
+#include "memDump.h"
 #include <iomanip>
-//#include <boost/format.hpp>
 ////////////////////////////////////////////////////////////////////////////////
-namespace utilities {
-//
+namespace memDump {
+const std::string FGRED       {"\033[1;31m"};  // foreground red
+const std::string FGGREEN     {"\033[1;32m"};  // foreground green
+const std::string RESET_COLOR {"\033[0m"};
+
+void dumpMemory(const char a[], std::ostream& os) {
+  dumpMemory(a, std::strlen(a), os);
+}
+
 // See: https://jrruethe.github.io/blog/2015/08/23/placement-new/ for original code;
 // page not found on Feb 2025, it's been archived here last time:
 // https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/
 //
 void dumpMemory(const void* ptr,
                 const std::size_t size,
-                std::string&& demangledTypeName,
+                const std::string&& demangledTypeName,
                 std::ostream& os) noexcept {
   using byte_t = unsigned char;
   using uptr_t = unsigned long;
-
-  const std::string FGRED       {"\033[1;31m"};  // foreground red
-  const std::string RESET_COLOR {"\033[0m"};
 
   // dump from ptr-16 bytes through ptr+16 bytes
   const uptr_t memBuffer {16};
@@ -29,7 +32,6 @@ void dumpMemory(const void* ptr,
 
   os << "-----------------------------------------------------------------------\n";
   if ("" != demangledTypeName) {
-    //os << boost::format("Type %s of %d bytes\n") % demangledTypeName % size;
     os << "Type "
        << demangledTypeName
        << " of "
@@ -40,7 +42,6 @@ void dumpMemory(const void* ptr,
        << ptr
        << "\n\n";
   } else {
-    //os << boost::format("%d bytes\n") % size;
     os << size
        << " bytes - Memory to dump starts at: "
        << std::hex << std::uppercase
@@ -48,14 +49,13 @@ void dumpMemory(const void* ptr,
        << "\n\n";
   }
 
-  // Write the address offsets along the top row
+  // Print the address offsets along the top row
   os << std::string(19, ' ');
-  for (std::size_t i{0}; i < 16; ++i) {
+  for (std::size_t i {0}; i < 16; ++i) {
     // Spaces between every 4 bytes
     if (i % 4 == 0) {
       os << " ";
     }
-    //os << boost::format(" %2hhX") % i; // Write the address offset
     os << std::hex
        << std::uppercase
        << " "
@@ -67,7 +67,6 @@ void dumpMemory(const void* ptr,
   // If the object is not aligned
   if (iptr % 16 != 0) {
     // Print the first address
-    //os << boost::format("\n0x%016lX:") % (iptr & ~15);
     os << "\n0x"
        << std::setfill('0')
        << std::setw(16)
@@ -76,7 +75,7 @@ void dumpMemory(const void* ptr,
        << ":";
 
     // Indent to the offset
-    for (std::size_t i{0}; i < iptr % 16; ++i) {
+    for (std::size_t i {0}; i < iptr % 16; ++i) {
       os << "   ";
       if (i % 4 == 0) {
         os << " ";
@@ -92,8 +91,7 @@ void dumpMemory(const void* ptr,
   // Dump the memory
   for (std::size_t i {0}; i < endByteToDump; ++i, ++iptr) {
     // New line and address every 16 bytes, spaces every 4 bytes
-    if ( iptr % 16 == 0 ) {
-      //os << boost::format("\n0x%016lX:") % iptr;
+    if (iptr % 16 == 0) {
       os << "\n0x"
          << std::setfill('0')
          << std::setw(16)
@@ -101,19 +99,18 @@ void dumpMemory(const void* ptr,
          << std::setw(0)
          << ":";
     }
-    if ( iptr % 4 == 0 ) {
+    if (iptr % 4 == 0) {
       os << " ";
     }
 
-    // Write the address contents
-    //os << boost::format(" %02hhX") % static_cast<uptr_t>(*reinterpret_cast<byte_t *>(iptr));
-    if ( 16 == i ) {
+    // Print the address contents
+    if (16 == i) {
       os << FGRED << "<";  // start marker
       marking = true;
     } else {
-      if ( closed ) {
+      if (closed) {
         closed = false;
-        if ( iptr % 16 == 0 ) {
+        if (iptr % 16 == 0) {
           os << " ";
         }
       } else {
@@ -126,18 +123,13 @@ void dumpMemory(const void* ptr,
        << std::setfill('0')
        << static_cast<uptr_t>(*reinterpret_cast<byte_t *>(iptr))
        << RESET_COLOR;
-    if ( i == endByteToMark ) {
+    if (i == endByteToMark) {
       closed = true;
       marking = false;
       os << FGRED << ">" << RESET_COLOR;  // end marker
     }
   }
-
   os << "\n-----------------------------------------------------------------------"
      << std::endl;
 }  // dumpMemory
-
-void dumpMemory(const char a[], std::ostream& os) {
-  dumpMemory(a, std::strlen(a), os);
-}
-}  // namespace utilities
+}  // namespace memDump

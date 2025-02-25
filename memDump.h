@@ -1,5 +1,5 @@
 //
-// dump-memory.h
+// memDump.h
 //
 #pragma once
 
@@ -11,11 +11,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 // useful macros
 // in case we want to dump a variable
-#define DMV(var) utilities::dumpMemory(&(var), sizeof(decltype(var)))
-//#define DMV(var) utilities::dumpMemory(&(var), sizeof(decltype(var)), getDemangledTypeName<decltype(var)>())
+#define DMV(var) memDump::dumpMemory(&(var), sizeof(decltype(var)))
+//#define DMV(var) memDump::dumpMemory(&(var), sizeof(decltype(var)), getDemangledTypeName<decltype(var)>())
 // in case we want to dump a memory of type type, pointed to by a pointer ptr
-#define DMP(ptr, type) utilities::dumpMemory(ptr, sizeof(type))
-//#define DMP(ptr, type) utilities::dumpMemory(ptr, sizeof(type), getDemangledTypeName<type>())
+#define DMP(ptr, type) memDump::dumpMemory(ptr, sizeof(type))
+//#define DMP(ptr, type) memDump::dumpMemory(ptr, sizeof(type), getDemangledTypeName<type>())
 
 namespace demangle {
 template<typename T>
@@ -23,9 +23,9 @@ static std::string getDemangledTypeName() noexcept;
 
 template<typename T>
 static std::string getDemangledTypeName() noexcept {
-  int status{};
-  char *demangledName{abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)};
-  std::string demangledNameString{static_cast<std::string>(demangledName)};
+  int status {};
+  char *demangledName {abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status)};
+  const std::string demangledNameString {static_cast<std::string>(demangledName)};
 
   free(demangledName);
 
@@ -33,21 +33,25 @@ static std::string getDemangledTypeName() noexcept {
 }
 }  // namespace demangle
 
-namespace utilities
+namespace memDump
 {
-void dumpMemory(const void* ptr,
-                std::size_t size,
-                std::string&& demangledTypeName = "",
-                std::ostream& os = std::cout) noexcept;
+extern const std::string FGRED;     // foreground red
+extern const std::string FGGREEN;  // foreground green
+extern const std::string RESET_COLOR;
 
-template <typename T>
-void dumpMemory(T ptr,
-                std::size_t size,
+void dumpMemory(const void* ptr,
+                const std::size_t size,
+                const std::string&& demangledTypeName = "",
                 std::ostream& os = std::cout) noexcept;
 
 template <typename T>
 void dumpMemory(const T ptr,
-                size_t size,
+                const std::size_t size,
+                std::ostream& os = std::cout) noexcept;
+
+template <typename T>
+void dumpMemory(const T ptr,
+                const std::size_t size,
                 std::ostream& os) noexcept {
   static_assert(std::is_pointer<T>::value, "pointer needed as arg 1 for dumpMemory()");
 
@@ -69,4 +73,4 @@ void dumpMemory(T&& var, std::ostream& os) noexcept {
 }
 
 void dumpMemory(const char a[], std::ostream& os = std::cout);
-}  // namespace utilities
+}  // namespace memDump

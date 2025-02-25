@@ -3,13 +3,15 @@ A memory dumper in C++
 
 C++ implementation of a memory dumper.
 
-Tested on Ubuntu 22.04.
+Tested on Ubuntu 24.04.
 
 See:
 
 [https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/](https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/)
 
 for original code.
+
+A PDF copy of that web page is in folder `doc/`.
 
 
 ## Requirements
@@ -30,10 +32,10 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ make
-$ ./dump-memory
+$ ./mem-dump
 ```
 
 
 ## How to Use it
 
-See the source code and the example for examples of use.
+See the source code and the examples in `main.cpp`.

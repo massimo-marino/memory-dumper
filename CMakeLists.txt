@@ -1,10 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.26)
-SET(THE_PROJECT dump-memory)
+SET(THE_PROJECT mem-dump)
 
 SET (CMAKE_C_COMPILER clang)
 SET (CMAKE_CXX_COMPILER clang++)
 
-PROJECT(${THE_PROJECT} LANGUAGES CXX VERSION 1.0.0 DESCRIPTION "dump-memory: memory dumper")
+PROJECT(${THE_PROJECT} LANGUAGES CXX VERSION 1.0.0 DESCRIPTION "mem-dump: memory dumper")
 
 # C++ version
 SET (CMAKE_CXX_STANDARD 20)
@@ -39,7 +39,7 @@ else()
 endif()
 
 SET(SOURCE_FILES
-    dump-memory.cpp
+    memDump.cpp
     main.cpp
 )
 SET(TARGET ${THE_PROJECT})
