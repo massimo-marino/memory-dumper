@@ -53,6 +53,7 @@ template <typename T>
 void dumpMemory(const T ptr,
                 const std::size_t size,
                 std::ostream& os) noexcept {
+  std::cout << "memDump::dumpMemory(T ptr,...) called before ...\n";
   static_assert(std::is_pointer<T>::value, "pointer needed as arg 1 for dumpMemory()");
 
   dumpMemory(reinterpret_cast<const void*>(ptr),
@@ -66,11 +67,29 @@ void dumpMemory(T&& var, std::ostream& os = std::cout) noexcept;
 
 template <typename T>
 void dumpMemory(T&& var, std::ostream& os) noexcept {
-  static_assert(std::is_reference<decltype(var)>::value != 0,
+  std::cout << "memDump::dumpMemory(T&& var,...) called before ...\n";
+  static_assert(std::is_reference<decltype(var)>::value,
                 "reference, or either lvalue or rvalue reference needed as arg 1 for dumpMemory()");
 
   dumpMemory(&var, sizeof(var), os);
 }
 
+template <typename T>
+void dumpMemory(T& var, std::ostream& os = std::cout) noexcept;
+
+template <typename T>
+void dumpMemory(T& var, std::ostream& os) noexcept {
+  std::cout << "memDump::dumpMemory(T& var,...) called before ...\n";
+  static_assert(std::is_reference<decltype(var)>::value,
+                "reference needed as arg 1 for dumpMemory()");
+
+  dumpMemory(&var, sizeof(var), os);
+}
+
 void dumpMemory(const char a[], std::ostream& os = std::cout);
+
+template <class T>
+T* addressof(T& v) noexcept {
+  return reinterpret_cast<T*>(& const_cast<char&>(reinterpret_cast<const volatile char&>(v)));
+}
 }  // namespace memDump

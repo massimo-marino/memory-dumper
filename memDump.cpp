@@ -10,13 +10,13 @@ const std::string FGGREEN     {"\033[1;32m"};  // foreground green
 const std::string RESET_COLOR {"\033[0m"};
 
 void dumpMemory(const char a[], std::ostream& os) {
+  std::cout << "memDump::dumpMemory(char [],...) called before ...\n";
   dumpMemory(a, std::strlen(a), os);
 }
 
 // See: https://jrruethe.github.io/blog/2015/08/23/placement-new/ for original code;
 // page not found on Feb 2025, it's been archived here last time:
 // https://web.archive.org/web/20210728162751/https://jrruethe.github.io/blog/2015/08/23/placement-new/
-//
 void dumpMemory(const void* ptr,
                 const std::size_t size,
                 const std::string&& demangledTypeName,
@@ -30,7 +30,7 @@ void dumpMemory(const void* ptr,
   // Allow direct arithmetic on the pointer
   uptr_t iptr = reinterpret_cast<uptr_t>(ptr) - memBuffer;
 
-  os << "-----------------------------------------------------------------------\n";
+  os << "[memDump:dumpMemory]---------------------------------------------------\n";
   if ("" != demangledTypeName) {
     os << "Type "
        << demangledTypeName
