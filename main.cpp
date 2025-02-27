@@ -397,6 +397,7 @@ void runExamples() {
 ////////////////////////////////////////////////////////////////////////////////
 int main () {
   checkEndianness();
+//  memDump::setFixedContextOption();
   runExamples();
   return 0;
 }
