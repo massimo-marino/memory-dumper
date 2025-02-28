@@ -4,12 +4,17 @@
 // Examples of memory dumps
 //
 #include "memDump.h"
+#include <cstddef>
 #include <iostream>
-#include <bit>
 #include <memory>
 #include <cstdint>
 
 using namespace std::string_literals;
+////////////////////////////////////////////////////////////////////////////////
+void logFuncName(const char fn[]) {
+  std::cout << memDump::FGGREEN << "\n>>> " << fn << " <<<\n" << memDump::RESET_COLOR;
+}
+#define LOGFNAME logFuncName(__func__);
 ////////////////////////////////////////////////////////////////////////////////
 class test_t {
 private:
@@ -106,22 +111,6 @@ __asm__
 ".section .data;\n"
 "_arr: .fill 10, 1, 0xFF;\n"
 );
-
-// see: https://en.cppreference.com/w/cpp/types/endian
-// since C++20
-void checkEndianness() {
-  if constexpr (std::endian::native == std::endian::big)
-    std::cout << "\ncheckEndianness: big-endian\n";
-  else if constexpr (std::endian::native == std::endian::little)
-    std::cout << "\ncheckEndianness: little-endian\n";
-  else
-    std::cout << "\ncheckEndianness: mixed-endian\n";
-}
-
-void logFuncName(const char fn[]) {
-  std::cout << memDump::FGGREEN << "\n>>> " << fn << " <<<\n" << memDump::RESET_COLOR;
-}
-#define LOGFNAME logFuncName(__func__);
 
 void dumpMemoryCase_1() {
   LOGFNAME
@@ -228,7 +217,7 @@ void dumpMemoryCase_8() {
   LOGFNAME
   extern std::byte _arr[];
 
-  for (int i {0}; i < 10; ++i) {
+  for (std::size_t i {0}; i < 10; ++i) {
       std::cout << "_arr["
                 << i
                 << "] = "
@@ -244,7 +233,7 @@ void dumpMemoryCase_9() {
   extern std::byte _arr[];
 
   std::fill_n(_arr, 10, static_cast<std::byte>(0xAA));
-  for (int i {0}; i < 10; ++i) {
+  for (std::size_t i {0}; i < 10; ++i) {
       std::cout << "_arr["
                 << i
                 << "] = "
@@ -253,6 +242,7 @@ void dumpMemoryCase_9() {
   }
   std::cout << "dumping global/static memory at " << _arr << "\n";
   memDump::dumpMemory(_arr, 10);
+  std::fill_n(_arr, 10, static_cast<std::byte>(0xFF));
 }
 
 void dumpMemoryCase_10() {
@@ -396,8 +386,12 @@ void runExamples() {
 }
 ////////////////////////////////////////////////////////////////////////////////
 int main () {
-  checkEndianness();
-//  memDump::setFixedContextOption();
+  memDump::checkEndianness();
+  memDump::setFixedContextOption();
   runExamples();
+  std::cout << "\n\n================================================================================\n\n";
+  memDump::setDynamicContextOption();
+  runExamples();
+  std::cout << "\n";
   return 0;
 }

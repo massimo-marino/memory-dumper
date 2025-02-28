@@ -20,7 +20,9 @@ A PDF copy of that web page is in folder `doc/`.
 
 The default compiler used is `clang++`.
 
-The cmake files compile with `-std=c++20`.
+You might want to change it to `g++`.
+
+The cmake file compiles with `-std=c++20`.
 
 
 ## Install and Run the Example

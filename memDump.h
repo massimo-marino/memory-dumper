@@ -38,17 +38,19 @@ namespace memDump
 using byte_t = unsigned char;
 using uptr_t = unsigned long;
 
-enum CONTEXT_OPTIONS {
-  Fixed = 1,
-  Dynamic = 2
+enum class DUMP_CONTEXT_OPTION {
+  FixedContext = 1,
+  DynamicContext = 2
 };
 
 extern const std::string FGRED;    // foreground red
 extern const std::string FGGREEN;  // foreground green
 extern const std::string RESET_COLOR;
 
-int setFixedContextOption();
-int setDynamicContextOption();
+void checkEndianness();
+
+DUMP_CONTEXT_OPTION setFixedContextOption();
+DUMP_CONTEXT_OPTION setDynamicContextOption();
 
 uptr_t setFixedPreBufferSize();
 uptr_t setFixedPostBufferSize();

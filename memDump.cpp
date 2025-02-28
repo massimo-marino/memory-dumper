@@ -2,10 +2,11 @@
 // memDump.cpp
 //
 #include "memDump.h"
+#include <bit>
 #include <iomanip>
 ////////////////////////////////////////////////////////////////////////////////
 namespace memDump {
-static int contextOption {Dynamic};      // default option
+static DUMP_CONTEXT_OPTION dumpContextOption {DUMP_CONTEXT_OPTION::DynamicContext};  // default option
 static uptr_t fixedPreBufferSize  {24};  // default size
 static uptr_t fixedPostBufferSize {24};  // default size
 
@@ -13,14 +14,25 @@ const std::string FGRED       {"\033[1;31m"};  // foreground red
 const std::string FGGREEN     {"\033[1;32m"};  // foreground green
 const std::string RESET_COLOR {"\033[0m"};
 
-int setFixedContextOption() {
-  contextOption = Fixed;
-  return contextOption;
+// see: https://en.cppreference.com/w/cpp/types/endian
+// since C++20
+void checkEndianness() {
+  if constexpr (std::endian::native == std::endian::big)
+    std::cout << "\ncheckEndianness: big-endian\n";
+  else if constexpr (std::endian::native == std::endian::little)
+    std::cout << "\ncheckEndianness: little-endian\n";
+  else
+    std::cout << "\ncheckEndianness: mixed-endian\n";
 }
 
-int setDynamicContextOption() {
-  contextOption = Dynamic;
-  return contextOption;
+DUMP_CONTEXT_OPTION setFixedContextOption() {
+  dumpContextOption = DUMP_CONTEXT_OPTION::FixedContext;
+  return dumpContextOption;
+}
+
+DUMP_CONTEXT_OPTION setDynamicContextOption() {
+  dumpContextOption = DUMP_CONTEXT_OPTION::DynamicContext;
+  return dumpContextOption;
 }
 
 uptr_t setFixedPreBufferSize(const uptr_t newSize) {
@@ -50,16 +62,16 @@ void dumpMemory(const void* ptr,
   uptr_t eptr {sptr + size - 1};               // End pointer of data to dump
 
   // set-up the context buffers around the data to dump
-  uptr_t preBuffer {};
-  uptr_t postBuffer {};
-  switch (contextOption) {
-    case Fixed:
-    // Option Fixed: fixed context: dump from (sptr - preBuffer) bytes through (eptr + postBuffer) bytes
-    preBuffer = fixedPreBufferSize;
-    postBuffer = fixedPostBufferSize;
+  uptr_t preBufferSize {};
+  uptr_t postBufferSize {};
+  switch (dumpContextOption) {
+    case DUMP_CONTEXT_OPTION::FixedContext:
+    // Option Fixed: fixed context: dump from (sptr - preBufferSize) bytes through (eptr + postBufferSize) bytes
+    preBufferSize = fixedPreBufferSize;
+    postBufferSize = fixedPostBufferSize;
     break;
 
-    case Dynamic:
+    case DUMP_CONTEXT_OPTION::DynamicContext:
     default:
     // Option Dynamic: dynamic context
     uptr_t smemptr {sptr & ~15}; // Round down to the last multiple of 16
@@ -70,26 +82,26 @@ void dumpMemory(const void* ptr,
     os << ">>>>> smemptr (hex): 0x" << std::hex << smemptr << std::dec
        << " ememptr (hex): 0x" << std::hex << ememptr << std::dec
        << " (ememptr - smemptr): " << (ememptr - smemptr)
-       << " preBuffer = (sptr - smemptr): " << (sptr - smemptr)
-       << " postBuffer = (ememptr - eptr): " << (ememptr - eptr)
+       << " preBufferSize = (sptr - smemptr): " << (sptr - smemptr)
+       << " postBufferSize = (ememptr - eptr): " << (ememptr - eptr)
        << "\n";
 */
-    preBuffer = (sptr - smemptr);
-    postBuffer = (ememptr - eptr);
+    preBufferSize = (sptr - smemptr);
+    postBufferSize = (ememptr - eptr);
     break;
   }
 
-  sptr = sptr - preBuffer;   // Start pointer - preBuffer
-  eptr = eptr + postBuffer;  // End pointer + postBuffer
+  sptr = sptr - preBufferSize;   // Start pointer - preBufferSize
+  eptr = eptr + postBufferSize;  // End pointer + postBufferSize
 
   [[maybe_unused]] const auto memToDumpSize {eptr - sptr + 1};
-  const auto endByteToDump {(preBuffer + size + postBuffer)};
-  const auto endByteToMark {(preBuffer + size - 1)};
+  const auto endByteToDump {(preBufferSize + size + postBufferSize)};
+  const auto endByteToMark {(preBufferSize + size - 1)};
 /*
   os << ">>>>> sptr (hex): 0x" << std::hex << sptr << std::dec
      << " eptr (hex): 0x" << std::hex << eptr << std::dec
-     << " preBuffer: " << preBuffer
-     << " postBuffer: " << postBuffer
+     << " preBufferSize: " << preBufferSize
+     << " postBufferSize: " << postBufferSize
      << " memToDumpSize: " << memToDumpSize
      << " size: " << size
      << " endByteToMark: " << endByteToMark
@@ -116,7 +128,7 @@ void dumpMemory(const void* ptr,
 
   // Print the address offsets along the top row
   os << std::string(19, ' ');
-  for (std::size_t i {0}; i < 16; ++i) {
+  for (uptr_t i {0}; i < 16; ++i) {
     // Spaces between every 4 bytes
     if (i % 4 == 0) {
       os << " ";
@@ -140,7 +152,7 @@ void dumpMemory(const void* ptr,
        << ":";
 
     // Indent to the offset
-    for (std::size_t i {0}; i < sptr % 16; ++i) {
+    for (uptr_t i {0}; i < sptr % 16; ++i) {
       os << "   ";
       if (i % 4 == 0) {
         os << " ";
@@ -152,7 +164,7 @@ void dumpMemory(const void* ptr,
   bool marking {false};
 
   // Dump the memory
-  for (std::size_t i {0}; i < endByteToDump; ++i, ++sptr) {
+  for (uptr_t i {0}; i < endByteToDump; ++i, ++sptr) {
     // New line and address every 16 bytes, spaces every 4 bytes
     if (sptr % 16 == 0) {
       os << "\n0x"
@@ -167,7 +179,7 @@ void dumpMemory(const void* ptr,
     }
 
     // Print the address contents
-    if (preBuffer == i) {
+    if (preBufferSize == i) {
       os << FGRED << "<";  // start highlighting marker
       marking = true;
     } else {
@@ -192,7 +204,6 @@ void dumpMemory(const void* ptr,
       os << FGRED << ">" << RESET_COLOR;  // end highlighting marker
     }
   }
-  os << "\n-----------------------------------------------------------------------"
-     << std::endl;
+  os << "\n-----------------------------------------------------------------------\n";
 }  // dumpMemory
 }  // namespace memDump
